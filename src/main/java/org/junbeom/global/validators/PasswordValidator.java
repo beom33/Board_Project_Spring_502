@@ -12,8 +12,10 @@ public interface PasswordValidator {
 
 
    default boolean alphaCheck(String password, boolean caseIncensitive) {
-
-       return false;
+     if (caseIncensitive) { // 대소문자 구분없이 알파벳 체크
+         return password.matches(".*[a-zA-Z]+.*");
+     }
+       return password.matches(".*[a-z]+.*") && password.matches(".*[A-Z]+.*");
    }
 
     /**
@@ -24,8 +26,7 @@ public interface PasswordValidator {
      */
 
    default boolean numberCheck(String password) {
-
-       return false;
+            return password.matches(".*\\d+.*");
    }
 
     /**
@@ -36,7 +37,7 @@ public interface PasswordValidator {
      */
 
    default boolean specialCharsCheck(String password) {
-
-       return false;
+       String pattern = ".*[^0-9a-zA-Zㄱ-ㅎ가-힣]+.*";
+       return password.matches(pattern);
    }
 }

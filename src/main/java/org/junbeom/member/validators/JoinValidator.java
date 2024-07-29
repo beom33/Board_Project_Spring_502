@@ -1,26 +1,33 @@
 package org.junbeom.member.validators;
 
+import lombok.RequiredArgsConstructor;
+import org.junbeom.global.validators.MobileValidator;
+import org.junbeom.global.validators.PasswordValidator;
 import org.junbeom.member.controllers.RequestJoin;
+import org.junbeom.member.repositories.MemberRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 @Component
-public class JoinValidator implements Validator{
+@RequiredArgsConstructor
+public class JoinValidator implements Validator, PasswordValidator, MobileValidator {
+
+    private final MemberRepository memberRepository;
+
     @Override
     public boolean supports(Class<?> clazz) {
         return clazz.isAssignableFrom(RequestJoin.class);
-
     }
 
     @Override
     public void validate(Object target, Errors errors) {
-        if(errors.hasErrors()) {
+        if (errors.hasErrors()) {
             return;
         }
 
         /**
-         * 1.이미 가입된 회원인지 체크
+         * 1. 이미 가입된 회원인지 체크
          * 2. 비밀번호, 비밀번호 확인 일치 여부
          * 3. 비밀번호 복잡성 체크
          * 4. 휴대전화번호 형식 체크
@@ -32,12 +39,26 @@ public class JoinValidator implements Validator{
         String confirmPassword = form.getConfirmPassword();
         String mobile = form.getMobile();
 
-        //2. 비밀번호, 비밀번호 확인 일치 여부
-        if (!password.equals(confirmPassword)) {
-            errors.rejectValue("confirmPassword","Mismatch.password");
+
+        // 1. 이미 가입된 회원인지 체크
+        if (memberRepository.exists(email)) {
+            errors.rejectValue("email", "Duplicated");
         }
 
-        //3. 비밀번호 복잡성 체크 - 알파벳 대소문자 각각 1개 이상, 숫자 1개 이상, 특수문자 1개 이상
 
+        //2. 비밀번호, 비밀번호 확인 일치 여부
+        if (!password.equals(confirmPassword)) {
+            errors.rejectValue("confirmPassword", "Mismatch.password");
+        }
+
+        // 3. 비밀번호 복잡성 체크 - 알파벳 대소문자 각각 1개 이상, 숫자 1개 이상, 특수문자 1개 이상
+        if (!alphaCheck(password, false) || !numberCheck(password) || !specialCharsCheck(password)) {
+            errors.rejectValue("password", "Complexity");
+        }
+
+        // 4. 휴대전화번호 형식 체크
+        if (!mobileCheck(mobile)) {
+            errors.rejectValue("mobile", "Mobile");
+        }
     }
 }
