@@ -2,15 +2,21 @@ package org.junbeom.global.configs;
 
 import org.junbeom.member.services.LoginFailureHandler;
 import org.junbeom.member.services.LoginSuccessHandler;
+import org.junbeom.member.services.MemberAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -32,23 +38,37 @@ public class SecurityConfig {
 
          });
 
-                 /*로그인, 로그아웃 E */
+        /* 로그인, 로그아웃 E */
 
-        /* 인가(접근 통제) 설정 S*/
+        /* 인가(접근 통제) 설정 S */
         http.authorizeHttpRequests(c -> {
-           c.requestMatchers("/mypage/**").authenticated() // 회원 전용
-                   .requestMatchers("/admin/**").hasAnyAuthority
-                           ("ADMIN")
-                   .anyRequest().permitAll();
+            /*
+            c.requestMatchers("/member/**").anonymous()
+                    .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
+                    .anyRequest().authenticated();
+            */
+            c.requestMatchers("/mypage/**").authenticated() // 회원 전용
+                    .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
+                    .anyRequest().permitAll();
+
+
         });
+
+        http.exceptionHandling(c -> {
+           c.authenticationEntryPoint(new MemberAuthenticationEntryPoint())
+                   .accessDeniedHandler((req, res, e) -> {
+                       res.sendError(HttpStatus.UNAUTHORIZED.value());
+
+                   });
+        });
+
         /* 인가(접근 통제) 설정 E */
 
-          return http.build();
-     }
+        return http.build();
+    }
 
-
-     @Bean
-     public PasswordEncoder passwordEncoder() {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-     }
+    }
 }
