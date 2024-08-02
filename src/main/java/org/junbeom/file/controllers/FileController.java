@@ -1,5 +1,6 @@
 package org.junbeom.file.controllers;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,8 @@ public class FileController {
         public void upload(@RequestPart("file")MultipartFile[] files,
                            @RequestParam(name="gid", required = false ) String gid,
                            @RequestParam(name="location", required = false)  String location) {
+
+            gid = StringUtils.hasText(gid) ? gid : UUID.randomUUID().toString();
 
         }
 

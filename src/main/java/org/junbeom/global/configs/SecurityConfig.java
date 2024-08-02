@@ -1,5 +1,6 @@
 package org.junbeom.global.configs;
 
+
 import org.junbeom.member.services.LoginFailureHandler;
 import org.junbeom.member.services.LoginSuccessHandler;
 import org.junbeom.member.services.MemberAuthenticationEntryPoint;
@@ -20,24 +21,22 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     @Bean
-     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-           /* 로그인, 로그아웃 S */
-         http.formLogin(f -> {
-                     f.loginPage("/member/login")
-                             .usernameParameter("email")
-                             .passwordParameter("password")
-                             .successHandler(new LoginSuccessHandler())
-                             .failureHandler(new LoginFailureHandler());
-                 });
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        /* 로그인, 로그아웃 S */
+        http.formLogin(f -> {
+            f.loginPage("/member/login")
+                    .usernameParameter("email")
+                    .passwordParameter("password")
+                    .successHandler(new LoginSuccessHandler())
+                    .failureHandler(new LoginFailureHandler());
+        });
 
 
-         http.logout(f -> {
-             f.logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
-                     .logoutSuccessUrl("/member/login");
+        http.logout(f -> {
+            f.logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
+                    .logoutSuccessUrl("/member/login");
 
-
-         });
-
+        });
         /* 로그인, 로그아웃 E */
 
         /* 인가(접근 통제) 설정 S */
@@ -50,19 +49,18 @@ public class SecurityConfig {
             c.requestMatchers("/mypage/**").authenticated() // 회원 전용
                     .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
                     .anyRequest().permitAll();
-
-
         });
 
         http.exceptionHandling(c -> {
-           c.authenticationEntryPoint(new MemberAuthenticationEntryPoint())
-                   .accessDeniedHandler((req, res, e) -> {
-                       res.sendError(HttpStatus.UNAUTHORIZED.value());
-
-                   });
+            c.authenticationEntryPoint(new MemberAuthenticationEntryPoint()).accessDeniedHandler((req, res, e) -> {
+                res.sendError(HttpStatus.UNAUTHORIZED.value());
+            });
         });
-
         /* 인가(접근 통제) 설정 E */
+
+
+        // iframe 자원 출처를 같은 서버 자원으로 한정
+        http.headers(c -> c.frameOptions(f -> f.sameOrigin()));
 
         return http.build();
     }
