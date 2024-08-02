@@ -1,20 +1,27 @@
 package org.junbeom.file.services;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.junbeom.file.constants.FileStatus;
 import org.junbeom.file.entities.FileInfo;
 import org.junbeom.file.exceptions.FileNotFoundException;
 import org.junbeom.file.repositories.FileInfoRepository;
+import org.junbeom.global.configs.FileProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@EnableConfigurationProperties(FileProperties.class)
 public class FileInfoService {
 
     private final FileInfoRepository infoRepository;
+    private final FileProperties properties;
+    private final HttpServletRequest request;
 
     /**
      *  파일 1개 조회
@@ -33,9 +40,10 @@ public class FileInfoService {
          * 2. 파일을 접근 할 수 있는 PATH - 파일 삭제, 다운로드 등등
          */
 
+        addFileInfo(item);
+
 ;        return item;
     }
-
     /**
      * 파일 목록 조회
      *
@@ -44,9 +52,42 @@ public class FileInfoService {
      * @param status - ALL: 완료 + 미완료, DONE - 완료, UNDONE - 미완료
      * @return
      */
-
     public List<FileInfo> getList(String gid, String location, FileStatus status) {
 
         return null;
+    }
+
+    /**
+     * 파일 정보 추가 처리
+     * - fileUrl, filePath
+     *
+     * @param item
+     */
+    public void addFileInfo(FileInfo item) {
+         String fileUrl = getFileUrl(item);
+         String filePath = getFilePath(item);
+
+         item.setFileUrl(fileUrl);
+         item.setFilePath(filePath);
+
+    }
+   // 브라우저 접근 주소
+    public String getFileUrl(FileInfo item) {
+        return request.getContextPath() + properties.getPath() + "/" +
+                getFolder(item.getSeq()) + "/" + getFileName(item);
+    }
+
+    // 서버 업로드 경로
+    public String getFilePath(FileInfo item) {
+        return properties.getPath() + "/" + getFolder(item.getSeq()) + "/" + getFileName((item));
+    }
+
+    public String getFolder(long seq) {
+        return String.valueOf(seq % 10L);
+    }
+
+    public String getFileName(FileInfo item) {
+        String fileName = item.getSeq() + Objects.requireNonNullElse(item.getExtension(), "");
+        return fileName;
     }
 }
