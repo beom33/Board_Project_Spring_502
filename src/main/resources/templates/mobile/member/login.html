@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{front/layouts/main}">
+
+<form name="frmLogin" method="post" th:action="@{/member/login}" autocomplete="off">
+
+      <div>
+          <input type="checkbox" name="autoLogin" value="true" id="autoLogin">
+          <label for="autoLogin" th:text="#{자동_로그인}"></label>
+
+      </div>
+
+</form>
