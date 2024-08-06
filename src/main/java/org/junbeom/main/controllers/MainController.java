@@ -12,6 +12,8 @@ public class MainController implements ExceptionProcessor {
     @GetMapping
       public String index() {
 
+
+
          return "front/main/index"; // 템플릿 경로
      }
 }
