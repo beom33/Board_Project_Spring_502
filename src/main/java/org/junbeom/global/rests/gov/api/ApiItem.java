@@ -19,19 +19,20 @@ public class ApiItem {
     private Long contentid;
     private Long contenttypeid;
 
-    @JsonFormat(pattern = "yyyyMMddHHmmss")
+    @JsonFormat(pattern="yyyyMMddHHmmss")
     private LocalDateTime createdtime;
 
-    @JsonFormat(pattern = "yyyyMMddHHmmss")
+    @JsonFormat(pattern="yyyyMMddHHmmss")
     private LocalDateTime modifiedtime;
-    private String dist;
+
+    private Double dist;
     private String firstimage;
     private String firstimage2;
     private String cpyrhtDivCd;
     private Double mapx;
     private Double mapy;
     private Integer mlevel;
-    private Integer sigunguCode;
-
-
+    private Integer sigungucode;
+    private String tel;
+    private String title;
 }

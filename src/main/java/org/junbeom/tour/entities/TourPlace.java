@@ -1,18 +1,20 @@
 package org.junbeom.tour.entities;
 
 
-import groovy.transform.builder.Builder;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junbeom.global.entities.BaseEntity;
 
 @Data
-@Builder
 @Entity
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class TourPlace extends BaseEntity {
     @Id
     private Long contentId;
