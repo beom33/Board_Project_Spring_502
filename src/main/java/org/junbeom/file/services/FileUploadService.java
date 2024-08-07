@@ -21,9 +21,10 @@ import java.util.UUID;
 public class FileUploadService {
 
     private final FileInfoRepository fileInfoRepository;
+    private final FileInfoService fileInfoService;
     private final FileProperties properties;
 
-    public List<FileInfo> upload(MultipartFile[] files, String gid, String location ) {
+    public List<FileInfo> upload(MultipartFile[] files, String gid, String location) {
         /**
          * 1. 파일 정보 저장
          * 2. 파일을 서버로 이동
@@ -39,7 +40,7 @@ public class FileUploadService {
         for (MultipartFile file : files) {
             String fileName = file.getOriginalFilename(); // 업로드 파일 원래 이름
             String contentType = file.getContentType(); // 파일 형식
-            String extension = fileName.substring(fileName.lastIndexOf(".") );
+            String extension = fileName.substring(fileName.lastIndexOf("."));
 
             FileInfo fileInfo = FileInfo.builder()
                     .gid(gid)
@@ -49,29 +50,31 @@ public class FileUploadService {
                     .contentType(contentType)
                     .build();
 
-                    fileInfoRepository.saveAndFlush(fileInfo);
+            fileInfoRepository.saveAndFlush(fileInfo);
 
-                    //2. 파일을 서버로 이동
-              long seq = fileInfo.getSeq();
-              String uploadDir = properties.getPath() + "/" + (seq % 10L);
-              File dir = new File(uploadDir);
-              if(!dir.exists() || !dir.isDirectory()) {
-                  dir.mkdir();
-              }
+            // 2. 파일을 서버로 이동
+            long seq = fileInfo.getSeq();
+            String uploadDir = properties.getPath() + "/" + (seq % 10L);
+            File dir = new File(uploadDir);
+            if (!dir.exists() || !dir.isDirectory()) {
+                dir.mkdir();
+            }
 
-              String uploadPath = uploadDir + "/" + seq + extension;
-              try {
-                  file.transferTo(new File(uploadPath));
+            String uploadPath = uploadDir + "/" + seq + extension;
+            try {
+                file.transferTo(new File(uploadPath));
 
-                  uploadedFiles.add(fileInfo); // 업로드 성공 파일 정보
+                uploadedFiles.add(fileInfo); // 업로드 성공 파일 정보
 
-              } catch (IOException e) {
-                  e.printStackTrace();
-                  // 파일 이동 실패시 정보 삭제
-                  fileInfoRepository.delete(fileInfo);
-                  fileInfoRepository.flush();
-              }
+            } catch (IOException e) {
+                e.printStackTrace();
+                // 파일 이동 실패시 정보 삭제
+                fileInfoRepository.delete(fileInfo);
+                fileInfoRepository.flush();
+            }
         }
+
+        uploadedFiles.forEach(fileInfoService::addFileInfo);
 
         return uploadedFiles;
     }
